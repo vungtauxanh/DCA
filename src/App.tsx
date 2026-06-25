@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { Calculator, LineChart as LineChartIcon, LayoutDashboard, Settings2, Target, TrendingDown, ShieldCheck } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { Calculator, LineChart as LineChartIcon, LayoutDashboard, Settings2, Target, TrendingDown, ShieldCheck, Sparkles, Image as ImageIcon, Loader2 } from "lucide-react";
 import { calculateOrders, StrategyParams, SpacingStrategy } from "./types";
 import { formatCurrency, formatNumber, cn } from "./utils";
 import {
@@ -29,6 +29,47 @@ export default function App() {
     volumeStrategy: "martingale",
     volumeMultiplier: 2.0,
   });
+
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsAnalyzing(true);
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+      const response = await fetch("/api/analyze-chart", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to analyze image");
+      }
+
+      const data = await response.json();
+      
+      setParams((prev) => ({
+        ...prev,
+        startPrice: data.startPrice || prev.startPrice,
+        endPrice: data.endPrice || prev.endPrice,
+        targetPrice: data.targetPrice || prev.targetPrice,
+        positionType: data.positionType === "long" || data.positionType === "short" ? data.positionType : prev.positionType,
+      }));
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi khi phân tích ảnh. Vui lòng thử lại.");
+    } finally {
+      setIsAnalyzing(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const handleParamChange = (key: keyof StrategyParams, value: any) => {
     setParams((prev) => ({ ...prev, [key]: value }));
@@ -108,6 +149,41 @@ export default function App() {
         
         {/* Cột trái: Cài đặt thông số */}
         <div className="lg:col-span-4 flex flex-col gap-6">
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl shadow-sm border border-indigo-100 p-5">
+            <h2 className="text-lg font-semibold flex items-center gap-2 mb-3 text-indigo-900">
+              <Sparkles className="w-5 h-5 text-indigo-600" />
+              AI Phân tích Biểu đồ
+            </h2>
+            <p className="text-sm text-indigo-700/80 mb-4">
+              Tải lên ảnh biểu đồ để AI tự động phân tích và đưa ra thông số khuyến nghị (Giá vào, chốt lời).
+            </p>
+            
+            <input 
+              type="file" 
+              accept="image/*" 
+              className="hidden" 
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isAnalyzing}
+              className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white py-2.5 px-4 rounded-lg font-medium transition-colors"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Đang phân tích...
+                </>
+              ) : (
+                <>
+                  <ImageIcon className="w-5 h-5" />
+                  Tải ảnh biểu đồ lên
+                </>
+              )}
+            </button>
+          </div>
+
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
             <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
               <Settings2 className="w-5 h-5 text-slate-500" />
