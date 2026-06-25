@@ -1,0 +1,6 @@
+{
+  "name": "Fixed Target Value Calculator",
+  "description": "Calculate order sizes and entry prices for a fixed target value strategy.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
