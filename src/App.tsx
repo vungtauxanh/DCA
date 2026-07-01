@@ -142,7 +142,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-12">
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
         <Target className="text-blue-600 w-6 h-6" />
-        <h1 className="text-xl font-bold tracking-tight text-slate-800">Máy tính DCA Nâng cao</h1>
+        <h1 className="text-xl font-bold tracking-tight text-slate-800">PV BAO COIN</h1>
       </header>
 
       <main className="max-w-7xl mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
